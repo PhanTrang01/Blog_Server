@@ -25,4 +25,15 @@ const getPosts = (req, res) => {
   });
 };
 
-module.exports = { getAllPosts, getPosts };
+const getPost = (req, res) => {
+  const q =
+    'SELECT p.id, u.username, p.title, p.desc, p.img, u.img AS userImg, p.category, p.CreateAt FROM `user` AS u JOIN `posts` AS p ON u.id = p.userId WHERE p.id = ?';
+
+  db.query(q, [req.params.id], (err, data) => {
+    if (err) return res.status(500).json(err);
+
+    return res.status(200).json(data[0]);
+  });
+};
+
+module.exports = { getPost, getPosts };

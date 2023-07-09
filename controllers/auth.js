@@ -1,4 +1,5 @@
 const database = require('../db');
+const bcrypt = require('bcrypt');
 
 const db = database.db;
 
@@ -9,45 +10,63 @@ db.connect((error) => {
   }
 });
 
-const registerItem = {
-  id: 1,
-  username: 'trangg',
-  email: 'trangg',
-  password: '123456',
-  img: 'https://png.pngtree.com/png-clipart/20190904/original/pngtree-user-cartoon-girl-avatar-png-image_4492903.jpg',
-};
-
 const register = (req, res) => {
-  // db.query('SELECT * FROM user', (error, results, fields) => {
-  //   if (error) {
-  //     console.error(error);
-  //   } else {
-  //     console.log(results);
-  //     res.json(results);
-  //   }
-  // });
-  console.log(req.body);
   const q = 'SELECT * FROM user WHERE username = ? OR email = ? ';
 
   db.query(q, [req.body.username, req.body.email], (err, data) => {
     if (err) {
-      console.log(res.status(500).json(err));
+      return res.status(500).json(err);
     }
-    // return console.log(res.status(500).json(err));
+    if (!req.body.username || !req.body.email)
+      return res.status(409).json('Please fill all fields!');
     if (data.length) return res.status(409).json('User already exists!');
 
-    const q = 'INSERT INTO user(username,email,password) VALUES (?)';
-    const values = [req.body.username, req.body.email, req.body.password];
+    //Hash the password and create a user
+    bcrypt.genSalt(10, function (err, salt) {
+      bcrypt.hash(req.body.password, salt, function (err, hash) {
+        // Store hash in your password DB.
+        const q = 'INSERT INTO user(username,email,password) VALUES (?)';
+        const values = [req.body.username, req.body.email, hash];
 
-    db.query(q, [values], (err, data) => {
-      if (err) return res.status(500).json(err);
-      return res.status(200).json('User has been created.');
+        db.query(q, [values], (err, data) => {
+          if (err) return res.status(500).json(err);
+          return res.status(200).json('User has been created.');
+        });
+      });
     });
   });
 };
 
 const login = (req, res) => {
-  res.json('this is login from controller');
+  const q = 'SELECT * FROM user WHERE username = ? ';
+
+  db.query(q, [req.body.username], (err, data) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    if (!req.body.username || !req.body.password) {
+      return res.status(409).json('Please fill all fields!');
+    }
+    if (!data || !data.length) {
+      return res.status(409).json('User not found!');
+    }
+
+    //Check password
+    bcrypt
+      .compare(req.body.password, data[0].password)
+      .then((result) => {
+        if (result !== true) {
+          return res.status(400).json('Wrong username or password!');
+        }
+        return res.status(200).json('Success!');
+      })
+      .catch((error) => {
+        console.log(error); // Handle the error appropriately
+        return res
+          .status(500)
+          .json('An error occurred during password comparison');
+      });
+  });
 };
 
 const logout = (req, res) => {

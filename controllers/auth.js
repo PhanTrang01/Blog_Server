@@ -1,5 +1,6 @@
 const database = require('../db');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const db = database.db;
 
@@ -57,8 +58,17 @@ const login = (req, res) => {
       .then((result) => {
         if (result !== true) {
           return res.status(400).json('Wrong username or password!');
+        } else {
+          const token = jwt.sign({ id: data[0].id }, 'jwtkey');
+          const { password, ...other } = data[0];
+          return res
+            .cookie('access_token', token, {
+              httpOnly: true,
+            })
+            .status(200)
+            .json(other);
         }
-        return res.status(200).json('Success!');
+        // return res.status(200).json('Success!');
       })
       .catch((error) => {
         console.log(error); // Handle the error appropriately
@@ -70,7 +80,13 @@ const login = (req, res) => {
 };
 
 const logout = (req, res) => {
-  res.json('this is logout from controller');
+  res
+    .clearCookie('access_token', {
+      sameSite: 'none',
+      secure: true,
+    })
+    .status(200)
+    .json('User has been logged out.');
 };
 
 module.exports = {

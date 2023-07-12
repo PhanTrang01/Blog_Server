@@ -81,4 +81,6 @@ const deletePost = (req, res) => {
   });
 };
 
+const updatePost = (req, res) => {};
+
 module.exports = { getPost, getPosts, addPost, deletePost };

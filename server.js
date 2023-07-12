@@ -1,8 +1,10 @@
 const express = require('express');
 const postRouter = require('./routes/posts.js');
 const authRouter = require('./routes/auth.js');
+const cookieParser = require('cookie-parser');
 
 const app = express();
+app.use(cookieParser());
 const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(bodyParser.json());

@@ -18,4 +18,11 @@ node server.js
 
 Open [http://localhost:5000](http://localhost:5000) with your browser to see the result.
 
+##  VSCode Extension
+
+- **Prettier** \*
+  - After install, go to vscode setting ( **CTRL + ,** ):
+    - Find formatter, set default formatter to prettier
+    - Turn on format on save
+
 

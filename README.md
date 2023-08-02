@@ -25,4 +25,6 @@ Open [http://localhost:5000](http://localhost:5000) with your browser to see the
     - Find formatter, set default formatter to prettier
     - Turn on format on save
 
+## Connect DB
+In brancch **sequelize**, use Sequelize library to create and manage MySQL database connections. 
 
